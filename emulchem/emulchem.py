@@ -1,6 +1,6 @@
 import pickle
 import numpy as np
-from network import NeuralNet
+from emulchem.network import NeuralNet
 import torch
 import torch.nn as nn
 import torchvision
