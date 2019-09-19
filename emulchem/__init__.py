@@ -5,3 +5,7 @@
 __author__ = """Damien de Mijolla"""
 __email__ = 'ucapdde@ucl.ac.uk'
 __version__ = '0.1.0'
+
+
+from emulchem.emulchem import ChemistryEmulator
+from emulchem.emulchem import RadexEmulator
