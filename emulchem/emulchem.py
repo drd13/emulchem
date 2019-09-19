@@ -5,6 +5,13 @@ import torch
 import torch.nn as nn
 import torchvision
 import torchvision.transforms as transforms
+import glob
+import os
+
+def molecule_list():
+    files = glob.glob("data/chem/scaler*.py")
+    molecules = [f.split(".")[0][6:] for x in files]
+    return molecules
 
 class Emulator():
     def __init__(self,specie):
@@ -29,9 +36,6 @@ class ChemistryEmulator(Emulator):
             self.input_scaler = pickle.load(f)
         with open("/home/drd13/Project/analysis/models/scaler{}.p".format(self.specie),"rb") as f:
             self.output_scaler= pickle.load(f)
-
-        #self.input_scaler = pickle.load(open("/home/drd13/Project/analysis/models/minMaxScaler.p", "rb"))
-        #self.output_scaler = pickle.load(open("/home/drd13/Project/analysis/models/scaler{}.p".format(self.specie),"rb" ))
     
     def get_prediction(self,radfield,zeta,density,av,temperature,metallicity):
         self.check_bounds(radfield,zeta,density,av,temperature,metallicity)

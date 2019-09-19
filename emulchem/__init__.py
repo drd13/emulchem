@@ -9,3 +9,4 @@ __version__ = '0.1.0'
 
 from emulchem.emulchem import ChemistryEmulator
 from emulchem.emulchem import RadexEmulator
+from emulchem.emulchem import molecule_list
