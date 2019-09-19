@@ -8,6 +8,10 @@ import torchvision.transforms as transforms
 import glob
 import os
 
+
+path_emulchem = os.path.dirname(__file__)
+print(path_emulchem)
+
 def molecule_list():
     files = glob.glob("data/chem/scaler*.py")
     molecules = [f.split(".")[0][6:] for x in files]
@@ -31,10 +35,10 @@ class ChemistryEmulator(Emulator):
     def __init__(self,specie):
         Emulator.__init__(self,specie)
         self.neural_network = NeuralNet(input_size=6,hidden_size=200,hidden_size2=100,hidden_size3=50,num_outputs=1)
-        self.neural_network.load_state_dict(torch.load("/home/drd13/Project/analysis/models/network{}".format(self.specie)))
-        with open("/home/drd13/Project/analysis/models/minMaxScaler.p","rb") as f:
+        self.neural_network.load_state_dict(torch.load(os.path.join(path_emulchem,"data/chem/network{}".format(self.specie))))
+        with open(os.path.join(path_emulchem,"data/chem/minMaxScaler.p"),"rb") as f:
             self.input_scaler = pickle.load(f)
-        with open("/home/drd13/Project/analysis/models/scaler{}.p".format(self.specie),"rb") as f:
+        with open(os.path.join(path_emulchem,"data/chem/scaler{}.p".format(self.specie)),"rb") as f:
             self.output_scaler= pickle.load(f)
     
     def get_prediction(self,radfield,zeta,density,av,temperature,metallicity):

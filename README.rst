@@ -16,8 +16,7 @@ emulchem
 
 
 
-A statistical emulator built using neural networks of the UCLCHEM and RADEX astronomical codes
-
+A statistical emulator built using neural networks of the UCLCHEM and RADEX astronomical codes. More detail can be found in the associated paper (put paper). If you end up using this code in published work, you can cite it as follows: put citation method
 
 * Free software: MIT license
 * Documentation: https://emulchem.readthedocs.io.
