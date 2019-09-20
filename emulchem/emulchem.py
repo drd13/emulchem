@@ -13,6 +13,7 @@ path_emulchem = os.path.dirname(__file__)
 print(path_emulchem)
 
 def molecule_list():
+    """Returns an array containing a list of all of the molecules included in the emulator"""
     files = glob.glob("data/chem/scaler*.py")
     molecules = [f.split(".")[0][6:] for x in files]
     return molecules
@@ -42,27 +43,51 @@ class ChemistryEmulator(Emulator):
             self.output_scaler= pickle.load(f)
     
     def get_prediction(self,radfield,zeta,density,av,temperature,metallicity):
+        """radfield
+        zeta
+        density
+        av 
+        temperature kelvin
+        metallicity """
         self.check_bounds(radfield,zeta,density,av,temperature,metallicity)
         x = [radfield,zeta,density,av,temperature,metallicity]
         y = np.exp(self.get_prediction_list(x))
         return y
 
     def check_bounds(self,radfield,zeta,density,av,temperature,metallicity):
+        """raises an error if the supplied parameter values are outside emulator range"""
+        av_bounds = [1,100]
+        density_bounds = [10**4,10**6]
+        temperature_bounds = [10,200]
+        metallicity_bounds = [0,2]
+        radfield_bounds = [1,10**3]
+        zeta_bounds = [1,10**3]
+
         out_of_bounds = []
-        if av<1 or av>100:
-            out_of_bounds.append("av")
-        if density<10**4 or density>10**6:
-            out_of_bounds.append("density")
-        if temperature<10 or temperature>200:
-            out_of_bounds.append("temperature")
-        if metallicity<0 or metallicity>2:
-            out_of_bounds.append("metallicity")
-        if radfield<1 or radfield>10**3:
-            out_of_bounds.append("radfield")
-        if zeta<1 or zeta>10**3:
-            out_of_bounds.append("zeta")
+
+        if av<av_bounds[0] or av>av_bounds[1]:
+            #out_of_bounds.append("av")
+            out_of_bounds.append("av was {} which is outside of the emulator bounds of {} to {}\n".format(av,av_bounds[0],av_bounds[1]))
+        if density<density_bounds[0] or density>10**6:
+            #out_of_bounds.append("density")
+            out_of_bounds.append("density was {} which is outside of the emulator bounds of {} to {}\n".format(density,density_bounds[0],density_bounds[1]))
+        if temperature<temperature_bounds[0] or temperature>temperature_bounds[1]:
+            #out_of_bounds.append("temperature")
+            out_of_bounds.append("temperature was {} which is outside of the emulator bounds of {} to {}\n".format(temperature,temperature_bounds[0],temperature_bounds[1]))
+        if metallicity<metallicity_bounds[0] or metallicity>metallicity_bounds[1]:
+            #out_of_bounds.append("metallicity")
+            out_of_bounds.append("metallicity was {} which is outside of the emulator bounds of {} to {}\n".format(metallicity,metallicity_bounds[0],metallicity_bounds[1]))
+        if radfield<radfield_bounds[0] or radfield>radfield_bounds[1]:
+            #out_of_bounds.append("radfield")
+            out_of_bounds.append("radfield was {} which is outside of the emulator bounds of {} to {}\n".format(radfield,radfield_bounds[0],radfield_bounds[1]))
+
+        if zeta<zeta_bounds[0] or zeta>zeta_bounds[1]:
+            #out_of_bounds.append("zeta")
+            out_of_bounds.append("zeta was {} which is outside of the emulator bounds of {} to {}\n".format(zeta,zeta_bounds[0],zeta_bounds[1]))
+
         if len(out_of_bounds) !=0:
-            raise Exception(", ".join(out_of_bounds)+ " out of emulator usable bounds")
+            raise Exception("".join(out_of_bounds))
+            #raise Exception(", ".join(out_of_bounds)+ " out of emulator usable bounds")
 
 
 
@@ -74,8 +99,11 @@ class RadexEmulator(Emulator):
         self.transition  = transition
         self.neural_network = NeuralNet(input_size=3,hidden_size=200,hidden_size2=100,hidden_size3=50,num_outputs=1)
         self.neural_network.load_state_dict(torch.load("/home/drd13/Project/analysis/modelsRadex/network{}{}".format(self.specie,self.transition)))
-        self.input_scaler = pickle.load(open("/home/drd13/Project/analysis/modelsRadex/minMaxScaler{}{}.p".format(self.specie,self.transition), "rb"))
-        self.output_scaler = pickle.load(open("/home/drd13/Project/analysis/modelsRadex/scaler{}{}.p".format(self.specie,self.transition),"rb" ))
+        self.input_scaler = pickle.load(open(os.path.join(path_emulchem,"data/rad/minMaxScaler{}{}.p".format(self.specie,self.transition)), "rb"))
+        self.output_scaler = pickle.load(open(os.path.join(path_emulchem,"data/rad/scaler{}{}.p".format(self.specie,self.transition)), "rb"))
+        
+        #self.input_scaler = pickle.load(open("/home/drd13/Project/analysis/modelsRadex/minMaxScaler{}{}.p".format(self.specie,self.transition), "rb"))
+        #self.output_scaler = pickle.load(open("/home/drd13/Project/analysis/modelsRadex/scaler{}{}.p".format(self.specie,self.transition),"rb" ))
 
     def get_prediction(self,temperature,density,column_density,line_width=1):
         """Temperature:Kelvin
