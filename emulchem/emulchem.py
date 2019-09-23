@@ -15,7 +15,7 @@ def molecule_list():
     """Returns an array containing a list of all of the molecules included in the emulator"""
     query = os.path.join(path_emulchem,"data","chem","scaler*.p")
     files = glob.glob(query)
-    molecules = [f.split(".")[0][6:] for f in files]
+    molecules = [f.split(".")[0][54:] for f in files]
     return molecules
 
 class Emulator():
@@ -45,12 +45,12 @@ class ChemistryEmulator(Emulator):
             self.output_scaler= pickle.load(f)
     
     def get_prediction(self,radfield,zeta,density,av,temperature,metallicity):
-        """radfield
-        zeta
-        density
-        av 
-        temperature kelvin
-        metallicity """
+        """radfield (Draine)
+        zeta (1.3 * 10^-17 s^-1)
+        density (cm^-3)
+        av (mag)
+        temperature (kelvin)
+        metallicity (Z)"""
         self.check_bounds(radfield,zeta,density,av,temperature,metallicity)
         x = [radfield,zeta,density,av,temperature,metallicity]
         y = np.exp(self.get_prediction_list(x))
@@ -102,10 +102,10 @@ class RadexEmulator(Emulator):
             self.output_scaler= pickle.load(f)
 
     def get_prediction(self,temperature,density,column_density,line_width=1):
-        """Temperature:Kelvin
-        Density:...
-        column_density:
-        line-width:
+        """Temperature (Kelvin)
+        Density (cm^-3)
+        column_density ()
+        line-width ()
         """
         self.check_bounds(temperature,density,column_density,line_width)
         x = [temperature,density,np.log10(column_density/line_width)]
@@ -146,33 +146,4 @@ class RadexEmulator(Emulator):
             raise Exception("".join(out_of_bounds))
 
 
-
-
-"""
-    def check_bounds(self,temperature,density,column_density,line_width):
-        out_of_bounds = []
-        scaled_column_density = column_density/line_width
-        if temperature<10 or temperature>200:
-            out_of_bounds.append("temperature")
-        if density<10**4 or density>10**6:
-            out_of_bounds.append("density")
-
-        if self.specie=="CO":
-            if scaled_column_density<10**13 or scaled_column_density>10**19:
-                out_of_bounds.append("column_density to line-width ratio")
-        elif self.specie=="CS":
-            if scaled_column_density<10**10 or scaled_column_density>10**18:
-                out_of_bounds.append("column_density to line-width ratio")
-        elif self.specie=="HCO+":
-            if scaled_column_density<10**8 or scaled_column_density>10**15:
-                out_of_bounds.append("column_density to line-width ratio")
-        elif self.specie=="HCN":
-            if scaled_column_density<10**9 or scaled_column_density>10**17:
-                out_of_bounds.append("column_density to line-width ratio")
-
-
-        if len(out_of_bounds) !=0:
-            raise Exception(", ".join(out_of_bounds)+ " out of emulator usable bounds")
-
-"""
 

@@ -12,7 +12,13 @@ To get a list of all of the molecules included in the package, the following com
     emulchem.molecule_list()
     
 Predictions can be obtained through the instantiated object as follows::
-    
+
+    radfield = 10
+    zeta = 10
+    density = 10**5 
+    temperature =  200
+    metallicity = 1
+    av = 10
     CS.get_prediction(radfield,zeta,density,av,temperature,metallicity)
 
 
