@@ -12,7 +12,7 @@ path_emulchem = os.path.dirname(__file__)
 print(path_emulchem)
 
 def molecule_list():
-    """Returns an array containing a list of all of the molecules included in the emulator"""
+    """Get an exhaustive list of all molecules included in the emulator"""
     query = os.path.join(path_emulchem,"data","chem","scaler*.p")
     files = glob.glob(query)
     molecules = [f.split(".")[0][54:] for f in files]
@@ -20,6 +20,13 @@ def molecule_list():
 
 class Emulator():
     def __init__(self,specie):
+        """Base emulator class
+
+        Parameters
+        ----------
+        specie: str
+            Molecule to predict using the emulator. Name must be one of those returned by molecule_list.
+        """
         self.specie = specie
 
     def get_prediction_list(self,x):
@@ -34,6 +41,13 @@ class Emulator():
 
 class ChemistryEmulator(Emulator):
     def __init__(self,specie):
+        """Base UCLCHEM emulator class
+
+        Parameters
+        ----------
+        specie: str
+            Molecule to predict using the emulator. Name must be one of those returned by molecule_list.
+        """
         Emulator.__init__(self,specie)
         self.neural_network = NeuralNet(input_size=6,hidden_size=200,hidden_size2=100,hidden_size3=50,num_outputs=1)
         path_chem = os.path.join(path_emulchem,"data","chem")
@@ -45,18 +59,34 @@ class ChemistryEmulator(Emulator):
             self.output_scaler= pickle.load(f)
     
     def get_prediction(self,radfield,zeta,density,av,temperature,metallicity):
-        """radfield (Draine)
-        zeta (1.3 * 10^-17 s^-1)
-        density (cm^-3)
-        av (mag)
-        temperature (kelvin)
-        metallicity (Z)"""
-        self.check_bounds(radfield,zeta,density,av,temperature,metallicity)
+        """Obtain predicted abundances for given physical conditions. 
+
+        Parameters
+        ----------
+        radfield: float
+            Ultraviolet-photoionization rate (Draine).
+        zeta: float
+            cosmic-ray ionization rate (1.3 * 10^-17 s^-1).
+        density: float
+           overall molecular density (cm^-3) 
+        av: float
+            visual extinction (mag)
+        temperature: float
+            temperature (Kelvin)
+        metallicity: float
+            multiplicative factor for elemental abundances with 1 corresponding to solar elemental abundances of Asplund et al (2009) (Z)
+
+        Outputs
+        -------
+        y: float
+            predicted molecular abundance 
+       """
+        self._check_bounds(radfield,zeta,density,av,temperature,metallicity)
         x = [radfield,zeta,density,av,temperature,metallicity]
         y = np.exp(self.get_prediction_list(x))
         return y
 
-    def check_bounds(self,radfield,zeta,density,av,temperature,metallicity):
+    def _check_bounds(self,radfield,zeta,density,av,temperature,metallicity):
         """raises an error if the supplied parameter values are outside emulator range"""
         av_bounds = [1,100]
         density_bounds = [10**4,10**6]
@@ -102,17 +132,33 @@ class RadexEmulator(Emulator):
             self.output_scaler= pickle.load(f)
 
     def get_prediction(self,temperature,density,column_density,line_width=1):
+        """Obtain predicted molecular line intensities for given physical conditions. 
+
+        Parameters
+        ----------
+        temperature: float
+            temperature (Kelvin)
+        density: float
+           overall molecular density (cm^-3) 
+        column_density: float
+
+        Outputs
+        -------
+        y: float
+            predicted line intensity 
+       """
+
         """Temperature (Kelvin)
         Density (cm^-3)
         column_density ()
         line-width ()
         """
-        self.check_bounds(temperature,density,column_density,line_width)
+        self._check_bounds(temperature,density,column_density,line_width)
         x = [temperature,density,np.log10(column_density/line_width)]
         y = self.get_prediction_list(x)*line_width
         return y
 
-    def check_bounds(self,temperature,density,column_density,line_width):
+    def _check_bounds(self,temperature,density,column_density,line_width):
         density_bounds = [10**4,10**6]
         temperature_bounds = [10,200]
         CO_bounds = [10**13,10**19]
