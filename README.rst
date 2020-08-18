@@ -59,12 +59,12 @@ Citation
 	year = 2019,
 	volume = 630,
 	pages = "A117",
-}
+ }
 
 License
 -------
 
-The software is released as is under an MIT license.
+The software is released, as is, under an MIT license.
 
 Documentation
 -------------
