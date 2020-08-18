@@ -15,11 +15,26 @@ emulchem
 
 A collection of statistical emulators for the UCLCHEM and RADEX astronomical codes. The UCLCHEM emulators can be used to obtain chemical abundances for various molecules under varying physical conditions. The RADEX emulator can be used to estimate the strength of molecular lines. Both emulators are built using neural networks. For more detail on the emulation procedure and its applications, please refer to the associated paper. Please cite the paper if you end up using it.
 
+
+Installation
+------------
+
+The module can be installed either through pip::
+
+   pip install emulchem
+
+or directly from the repository::
+
+    git clone https://github.com/drd13/emulchem.git
+    cd emulchem
+    pip install .
+
+
 Usage
 -----
 
-We give here a quick demonstration of our package. Check the documentation for a more thorough explatiion. `Documentation
-<https://emulchem.readthedocs.io>`_.
+We give here a quick demonstration of our package. Check the `Documentation
+<https://emulchem.readthedocs.io>`_ for a more thorough explanation.
 
 The emulators can be accessed through our ``ChemistryEmulator`` and ``RadexEmulator`` objects::
 
