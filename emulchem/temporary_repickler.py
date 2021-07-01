@@ -11,8 +11,6 @@ for scaler_path in scaler_paths:
     scaler_json = {}
     scaler_json["x_scale"] = list(scaler.scale_)
     scaler_json["x_min"] = list(scaler.min_)
-    scaler_json = json.dumps(scaler_json, indent = 2)
-    print(scaler_json)
 
     json_path = str(scaler_path.parent) +"/"+ scaler_path.stem + ".json"
     with open(json_path, 'w') as f:
