@@ -1,4 +1,5 @@
 import pickle
+import json
 import numpy as np
 from emulchem.network import NeuralNet
 from emulchem.scaler import MinMaxScaler
@@ -38,8 +39,11 @@ class Emulator():
         return y_val[0][0]
 
     def deserialize_scaler(self,scaler_path):
+        print(scaler_path)
         with open(scaler_path,"r") as f:
-            scaler_dict = json.load(f)
+            scaler_dict = json.loads(f.read())
+        print(type(scaler_dict))
+        print(scaler_dict)
         return MinMaxScaler(x_scale=scaler_dict["x_scale"],x_min = scaler_dict["x_min"])
 
 
@@ -60,7 +64,7 @@ class ChemistryEmulator(Emulator):
         #self.neural_network.load_state_dict(torch.load(os.path.join(path_emulchem,"data/chem/network{}".format(self.specie))))
         self.neural_network.load_state_dict(torch.load(os.path.join(path_chem,"network{}".format(self.specie))))
         input_scaler_path = os.path.join(path_chem,"minMaxScaler.json") 
-        output_scaler_path = os.path.join(path_chem,"scaler{}.p".format(self.specie))
+        output_scaler_path = os.path.join(path_chem,"scaler{}.json".format(self.specie))
 
         self.input_scaler = self.deserialize_scaler(input_scaler_path)
         self.output_scaler = self.deserialize_scaler(output_scaler_path)
@@ -134,8 +138,8 @@ class RadexEmulator(Emulator):
         path_rad = os.path.join(path_emulchem,"data","rad")
         self.neural_network.load_state_dict(torch.load(os.path.join(path_rad,"network{}{}".format(self.specie,self.transition))))
        
-        input_scaler_path = os.path.join(path_rad,"minMaxScaler{}{}.p".format(self.specie,self.transition))
-        output_scaler_path = os.path.join(path_rad,"scaler{}{}.p".format(self.specie,self.transition))
+        input_scaler_path = os.path.join(path_rad,"minMaxScaler{}{}.json".format(self.specie,self.transition))
+        output_scaler_path = os.path.join(path_rad,"scaler{}{}.json".format(self.specie,self.transition))
         
         self.input_scaler = self.deserialize_scaler(input_scaler_path)
         self.output_scaler = self.deserialize_scaler(output_scaler_path)
