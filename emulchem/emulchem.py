@@ -1,6 +1,7 @@
 import pickle
 import numpy as np
 from emulchem.network import NeuralNet
+from emulchem.scaler import MinMaxScaler
 import torch
 import torch.nn as nn
 import torchvision
@@ -34,7 +35,12 @@ class Emulator():
         x_val = self.input_scaler.transform(x.reshape(1,-1))
         y_val = self.neural_network(torch.FloatTensor(x_val)).detach().numpy()[0]
         y_val = self.output_scaler.inverse_transform(y_val.reshape(1,-1))
-        return y_val[0][0]        
+        return y_val[0][0]
+
+    def deserialize_scaler(self,scaler_path):
+        with open(scaler_path,"r") as f:
+            scaler_dict = json.load(f)
+        return MinMaxScaler(x_scale=scaler_dict["x_scale"],x_min = scaler_dict["x_min"])
 
 
 
@@ -53,10 +59,11 @@ class ChemistryEmulator(Emulator):
         path_chem = os.path.join(path_emulchem,"data","chem")
         #self.neural_network.load_state_dict(torch.load(os.path.join(path_emulchem,"data/chem/network{}".format(self.specie))))
         self.neural_network.load_state_dict(torch.load(os.path.join(path_chem,"network{}".format(self.specie))))
-        with open(os.path.join(path_chem,"minMaxScaler.p"),"rb") as f:
-            self.input_scaler = pickle.load(f)
-        with open(os.path.join(path_chem,"scaler{}.p".format(self.specie)),"rb") as f:
-            self.output_scaler= pickle.load(f)
+        input_scaler_path = os.path.join(path_chem,"minMaxScaler.json") 
+        output_scaler_path = os.path.join(path_chem,"scaler{}.p".format(self.specie))
+
+        self.input_scaler = self.deserialize_scaler(input_scaler_path)
+        self.output_scaler = self.deserialize_scaler(output_scaler_path)
     
     def get_prediction(self,radfield,zeta,density,av,temperature,metallicity):
         """Obtain predicted abundances for given physical conditions. 
@@ -126,11 +133,13 @@ class RadexEmulator(Emulator):
         self.neural_network = NeuralNet(input_size=3,hidden_size=200,hidden_size2=100,hidden_size3=50,num_outputs=1)
         path_rad = os.path.join(path_emulchem,"data","rad")
         self.neural_network.load_state_dict(torch.load(os.path.join(path_rad,"network{}{}".format(self.specie,self.transition))))
-        with open(os.path.join(path_rad,"minMaxScaler{}{}.p".format(self.specie,self.transition)),"rb") as f:
-            self.input_scaler = pickle.load(f)
-        with open(os.path.join(path_rad,"scaler{}{}.p".format(self.specie,self.transition)),"rb") as f:
-            self.output_scaler= pickle.load(f)
-
+       
+        input_scaler_path = os.path.join(path_rad,"minMaxScaler{}{}.p".format(self.specie,self.transition))
+        output_scaler_path = os.path.join(path_rad,"scaler{}{}.p".format(self.specie,self.transition))
+        
+        self.input_scaler = self.deserialize_scaler(input_scaler_path)
+        self.output_scaler = self.deserialize_scaler(output_scaler_path)
+ 
     def get_prediction(self,temperature,density,column_density,line_width=1):
         """Obtain predicted molecular line intensities for given physical conditions. 
 
